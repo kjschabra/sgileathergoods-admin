@@ -1,0 +1,23 @@
+.row {
+  padding:10px;
+}
+.inputFileClass {
+  color:#FFF;
+  width:100% !important;
+}
+
+::-webkit-input-placeholder {
+   color: #FFF;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: #FFF;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #FFF;
+}
+
+:-ms-input-placeholder {
+   color: #FFF;
+}
