@@ -4,84 +4,83 @@ import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
 
 Meteor.methods({
-  addProduct(name, length, width, volume, description, imageId) {
+  addProduct(formValues) {
     if (!this.userId) {
       throw new Meteor.error('Not-logged-in', "Please login!");
     }
-    check(name, String);
-    check(length, Number);
-    check(width, Number);
-    check(volume, Number);
-    check(description, String);
-    check(imageId, String);
+    check(formValues, Array);
+
     let processed = true;
-    let error = '';
+    let error;
+    let product = {
+      hidden:false,
+      deleted:false,
+      addedOn: new Date(),
+    };
+
+    formValues.map(function(values) {
+      if (values && values.tag && values.value && !_.isUndefined(values.tag) && !_.isEmpty(values) && !_.isArray(values.value) ) {
+        product[values.tag] = values.value;
+      }
+    });
     try {
-      ProductsCollection.insert({
-        name: name,
-        length: length,
-        width: width,
-        volume: volume,
-        description: description,
-        imageIds: imageId,
-        addedOn: new Date()
-      });
+      ProductsCollection.insert(product);
     } catch (e) {
       processed = false;
-      error = new Meteor.Error('errorInsertingProduct', e);
+      error = e;
     }
     if (processed) {
-      return "Product has been added to a list of collection"
+      return "Product added to the collection";
     } else {
-      return error;
+      return new Meteor.Error("errorInsertingProduct", error);
     }
   },
-  updateProduct(productId, name, length, width, volume, description, imageId) {
+  updateProduct(productId, formValues) {
     if (!this.userId) {
       throw new Meteor.error('Not-logged-in', "Please login!");
     }
     check(productId, String);
-    check(name, String);
-    check(length, Number);
-    check(width, Number);
-    check(volume, Number);
-    check(description, String);
-    check(imageId, String);
+    check(formValues, Array);
+
     let processed = true;
-    let error = '';
+    let error;
+    let product = {};
+
+    formValues.map(function(values) {
+      if (values && !_.isUndefined(values.tag) && _.isString(values.value)) {
+        product[values.tag] = values.value;
+      }
+    });
     try {
-      ProductsCollection.insert({
-        name: name,
-        length: length,
-        width: width,
-        volume: volume,
-        description: description,
-        imageIds: imageId,
-        addedOn: new Date()
-      });
+      ProductsCollection.update({
+        _id: productId
+      }, {$set: product});
     } catch (e) {
+      console.log("errorUpdatingProduct", e);
       processed = false;
-      error = new Meteor.Error('errorInsertingProduct', e);
+      error = e;
     }
     if (processed) {
-      return "Product has been added to a list of collection"
+      return "Product has been updated";
     } else {
-      return error;
+      return new Meteor.Error("errorInsertingProduct", error);
     }
   },
-  deleteProduct(productId) {
+  toggleDeleteProduct(productId) {
     if (!this.userId) {
       throw new Meteor.error('Not-logged-in', "Please login!");
     }
     check(productId, String);
     let updated = true;
     let error = "";
+    let product = ProductsCollection.findOne({_id: productId});
+
     try {
       ProductsCollection.update({
         _id: productId
       }, {
         $set: {
-          deleted: true
+          deleted: (!product.deleted || true)
         }
       });
     } catch (e) {

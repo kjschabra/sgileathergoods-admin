@@ -1,6 +1,9 @@
 .row {
   padding:10px;
 }
+div.col-md-12 > div.col-md-3{
+  min-height: 500px;
+}
 .inputFileClass {
   color:#FFF;
   width:100% !important;

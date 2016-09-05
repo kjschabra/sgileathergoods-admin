@@ -3,67 +3,87 @@ import {Meteor} from 'meteor/meteor';
 import {createContainer} from 'meteor/react-meteor-data';
 import {ProductImages} from '../../../imports/collections.js';
 import Loading from '../components/loading.jsx';
+import Swal from 'sweetalert';
 export default class Products extends React.Component {
   componentDidMount() {
+    $('[data-toggle="tooltip"]').tooltip();
     return null;
   }
-  displayImage() {
-    if (this.props.imageLoading) {
-      return <Loading/>;
-    } else {
-      return <img src={this.props.image.url(store = "images")} alt="" className="img-responsive" width="250"/>;
-    }
-  }
-  displayLabel() {
-    if (this.props.data) {
-      let length,
-        width,
-        volume;
-      if (this.props.data.length) {
-        length = this.props.data.length;
+  toggleDeleteProduct(event) {
+    let self = this.props.data;
+    Swal({
+      title: "Delete Product",
+      text: "Are you sure you want to delete this product?",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d02d00",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No!",
+      closeOnConfirm: false,
+      closeOnCancel: true
+    }, function(isConfirm) {
+      if (isConfirm) {
+        Meteor.call("toggleDeleteProduct", self._id, function(err, result) {
+          if (err) {
+            swal("Oops..", err, "error");
+          }
+          if (result) {
+            swal("Product Deleted", result, "success");
+            FlowRouter.go('/admin');
+          }
+        });
       }
-      if (this.props.data.width) {
-        width = this.props.data.width;
-      }
-      if (this.props.data.volume) {
-        volume = this.props.data.volume
-      }
-      return <h5 className="text-center">
-        <span className="label label-primary text-center">{length + "in x " + width + "in x " + volume + "in"}</span>
-      </h5>;
-    }
+    });
   }
   renderEditMenu() {
     return <div className="row text-right text-info">
       <ul className="list-inline">
         <li>
-          <a href={'admin/edit-product/' + this.props.data._id}>
+          <a href={FlowRouter.url('AdminEditProduct', {productId:this.props.data._id} )}>
             <span className="label label-info">
-              <i className="fa fa-pencil"></i>
+              <i className="fa fa-pencil" data-toggle="tooltip" data-placement="top" title="Edit"></i>
             </span>
           </a>
         </li>
         <li>
           <a href="#">
-            <span className="label label-danger">
-              <i className="fa fa-trash"></i>
+            <span className="label label-danger" onClick={this.toggleDeleteProduct.bind(this)}>
+              <i className="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Delete"></i>
             </span>
           </a>
         </li>
       </ul>
     </div>
   }
+  displayImage() {
+    if (this.props.imageLoading) {
+      return <Loading/>;
+    } else {
+      return <img src={this.props.image.url(store = "images")} alt="" className="img-responsive thumbnail" />;
+    }
+  }
+	displaySize() {
+		if (this.props.data && this.props.data.productSizeLength && this.props.data.productSizeLength !== "0" && this.props.data.productSizeWidth && this.props.data.productSizeWidth !== "0" && this.props.data.productSizeVolume && this.props.data.productSizeVolume !== "0") {
+			return this.props.data.productSizeLength+"in x "+this.props.data.productSizeWidth+"in x "+this.props.data.productSizeVolume+"in"
+		}
+	}
   render() {
     return <div className="col-md-3">
       {this.renderEditMenu()}
-      <div className="thumbnail">
-        {this.displayImage()}
-        <div className="caption">
-          <h3>{this.props.data.name}</h3>
-          {this.displayLabel()}
-          <p>{this.props.data.description}</p>
-        </div>
-      </div>
+      {this.displayImage()}
+      <h5 className="text-info">{this.props.data.productName}<br/>
+        <small className="text-primary">{this.displaySize()}</small><br/>
+      </h5>
+      <h5>
+        <small className="text-muted">Available in:
+          <strong>&nbsp;{this.props.data.productColor}</strong>
+        </small>
+      </h5>
+      <p className="text-muted">{this.props.data.productDescription}</p>
+      <h4 className="text-right">
+        <span className="label label-primary">{this.props.data.productPrice}</span>
+      </h4>
+      <hr/>
     </div>
   }
 }
@@ -73,7 +93,7 @@ export default class Products extends React.Component {
 export default Products = createContainer(props => {
   // props here will have `main`, passed from the router
   // anything we return from this function will be *added* to it
-  let imageIds = props.data.imageIds,
+  let imageIds = props.data.productImageId,
     productImages = {
       loading: true,
       data: []

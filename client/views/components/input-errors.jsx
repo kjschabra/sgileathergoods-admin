@@ -14,10 +14,10 @@ SGI.globalInputErrors = function(value, errorsArray) {
       if (error === "empty" && !value.trim() ) {
         errorChecks.push(SGI.globalInputErrorsMessage[error]);
       }
-      if (error === "number" && isNaN(value.trim()) ) {
+      if (error === "number" && isNaN(value.trim() ) ) {
         errorChecks.push(SGI.globalInputErrorsMessage[error]);
       }
-      if (error === "image" && _.isEmpty(value.trim())){
+      if (error === "image" && _.isEmpty(value) ){
         errorChecks.push(SGI.globalInputErrorsMessage[error]);
       }
     });

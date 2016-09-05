@@ -7,18 +7,32 @@ if (Meteor.isServer) {
   // This code only runs on the server
   Meteor.publish('productsCollection', function() {
     if (this.userId)
-      return ProductsCollection.find({}, {sort:{addedOn:-1 } } );
+      return ProductsCollection.find({deleted:false, hidden:false}, {sort:{addedOn:-1 } } );
     else
       return null;
     }
   );
   Meteor.publish('productById', function(productId) {
-    if (this.userId)
+    if (this.userId){
       return ProductsCollection.find({_id: productId});
-    else
+    } else {
       return null;
     }
-  );
+  });
+  Meteor.publish('deletedProductsCollection', function() {
+    if (this.userId){
+      return ProductsCollection.find({deleted:true, hidden:false}, {sort:{addedOn:-1 } } );
+    } else {
+      return null;
+    }
+  });
+  Meteor.publish('hiddenProductsCollection', function() {
+    if (this.userId) {
+      return ProductsCollection.find({deleted:false, hidden:true}, {sort:{addedOn:-1 } } );
+    } else {
+      return null;
+    }
+  });
   Meteor.publish('productImages', function() {
     if (this.userId) {
       return ProductImages.find({

@@ -35,10 +35,10 @@ export default class RenderForm extends React.Component {
       return <label htmlFor={element.ref} className={element.tagClass}>{element.labelValue}</label>
     }
     if (element.tag && element.tag === "input") {
-      return <input className={element.tagClass} data-errors={this.renderPossibleElementErrors(element.errors)} name={element.ref}  ref={element.ref} onChange={this.props.onUpdate.bind(element.ref)} type={element.tagType} placeholder={element.placeholder} defaultValue={element.value}/>
+      return <input className={element.tagClass} data-errors={this.renderPossibleElementErrors(element.errors)} name={element.ref}  ref={element.ref} onChange={this.props.onUpdate.bind(element.ref)} type={element.tagType} placeholder={element.placeholder} defaultValue={element.value} multiple={element.multiple}/>
     }
     if (element.tag && element.tag === "textarea") {
-      return <textarea className={element.tagClass} data-errors={this.renderPossibleElementErrors(element.errors)} name={element.ref}  ref={element.ref} onChange={this.props.onUpdate.bind(element.ref)} placeholder={element.placeholder} defaultValue={element.value} rows="5"/>
+      return <textarea className={element.tagClass} data-errors={this.renderPossibleElementErrors(element.errors)} name={element.ref}  ref={element.ref} onChange={this.props.onUpdate.bind(element.ref)} placeholder={element.placeholder} defaultValue={element.value} rows={element.rows || "5"}/>
     }
     if (element && element.tag === "img"){
       return <img className={element.tagClass || ""} name={element.ref} alt={element.alt || ""} src={element.src || "" } />

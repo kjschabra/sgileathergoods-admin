@@ -17,7 +17,7 @@ export default class EditProductDisplay extends React.Component {
       let formData = [
         {
           labelValue: "Product Name",
-          value: productData.name,
+          value: productData.productName,
           label: "Product Name",
           tagDivClass: "col-md-10",
           tagClass: "form-control",
@@ -32,7 +32,7 @@ export default class EditProductDisplay extends React.Component {
           labelClass: "col-sm-2",
           additionalTag: [
             {
-              value: productData.length,
+              value: productData.productSizeLength,
               tagDivClass: "col-md-3",
               tagClass: "form-control",
               tagType: "text",
@@ -44,7 +44,7 @@ export default class EditProductDisplay extends React.Component {
               ref: "productSizeLength"
             }, {
               labelValue: "Product Width",
-              value: productData.width,
+              value: productData.productSizeWidth,
               tagDivClass: "col-md-3",
               tagClass: "form-control",
               tagType: "text",
@@ -57,7 +57,7 @@ export default class EditProductDisplay extends React.Component {
               ref: "productSizeWidth"
             }, {
               labelValue: "Product Volume",
-              value: productData.volume,
+              value: productData.productSizeVolume,
               tagDivClass: "col-md-3",
               tagClass: "form-control",
               tagType: "text",
@@ -73,36 +73,36 @@ export default class EditProductDisplay extends React.Component {
         }, {
           labelValue: "Product Color",
           labelClass: "col-md-2",
-          value: productData.colour,
+          value: productData.productColor,
           tagDivClass: "col-md-10",
           tagClass: "form-control",
           tag: "input",
           tagType: "text",
           placeholder: "Black, Red, Brown",
-          errors:["empty"],
+          errors: ["empty"],
           ref: "productColor"
         }, {
           labelValue: "Product Price",
           labelClass: "col-md-2",
-          value: productData.price,
+          value: productData.productPrice,
           tagDivClass: "col-md-10",
           tagClass: "form-control",
           tagType: "text",
           tag: "input",
           tagType: "text",
           placeholder: "$130 CAD",
-          errors:["empty"],
+          errors: ["empty"],
           ref: "productPrice"
         }, {
           labelValue: "Product Description",
-          value: productData.description,
+          value: productData.productDescription,
           tagDivClass: "col-md-10",
           tagClass: "form-control",
           tagType: "text",
           labelClass: "col-md-2",
           tag: "textarea",
           placeholder: "This handbag can carry...",
-          errors:["empty"],
+          errors: ["empty"],
           ref: "productDescription"
         }, {
           labelValue: "Product Image",
@@ -132,63 +132,112 @@ export default class EditProductDisplay extends React.Component {
     event.preventDefault();
     let hasErrors = false;
     let formData = this.formData(this.props.product);
-    let formValues =[];
-
+    let formValues = [];
+    let additionalTags = [];
     formData.map(function(formGet, k) {
       let err = {};
-      if (formGet && formGet.additionalTag && formGet.additionalTag.length > 0){
-
-      }
-      else {
-        if ((formGet.tag === "input" || formGet.tag === "textarea") && formGet.errors){
+      if (formGet && formGet.additionalTag && formGet.additionalTag.length > 0) {
+        formGet.additionalTag.map(function(tag, i) {
+          if ((tag.tag === "input" || tag.tag === "textarea") && tag.errors) {
+            let additionErr = {};
+            let elemValue = document.getElementsByName(tag.ref)[0].value.trim();
+            additionErr.message = SGI.globalInputErrors(elemValue, tag.errors);
+            additionErr.tag = tag.ref;
+            additionErr.value = elemValue;
+            if (additionErr && additionErr.message && !_.isEmpty(additionErr.message)) {
+              document.getElementById(additionErr.tag).innerHTML = additionErr.message.join(" and ");
+              additionErr.validating = true;
+            }
+            additionalTags.push(additionErr);
+          }
+        });
+      } else {
+        if ((formGet.tag === "input" || formGet.tag === "textarea") && formGet.errors) {
           let elemValue = document.getElementsByName(formGet.ref)[0].value.trim();
           err.message = SGI.globalInputErrors(elemValue, formGet.errors);
-          err.errTag = formGet.ref;
+          err.tag = formGet.ref;
           err.value = elemValue
         }
       }
-      if (err && err.message  && !_.isEmpty(err.message) ) {
-        document.getElementById(err.errTag).innerHTML = err.message.join(" and ");
+      if (err && err.message && !_.isEmpty(err.message)) {
+        document.getElementById(err.tag).innerHTML = err.message.join(" and ");
         err.validating = true;
       }
-
       formValues.push(err);
     });
-
-    formValues.map(function(errorObj){
-      if (errorObj && errorObj.validating){
+    if (additionalTags && !_.isEmpty(additionalTags)) {
+      formValues = _.union(formValues, additionalTags);
+    }
+    formValues.map(function(errorObj) {
+      if (errorObj && errorObj.validating) {
         hasErrors = true;
       }
     });
-    if (!hasErrors){
-      Meteor.call("updateProduct", formValues, function(err, result){
+    if (!hasErrors) {
+      Meteor.call("updateProduct", this.props.productId, formValues, function(err, result) {
         if (err) {
-          Swal ("Error!", err.error, "error");
+          Swal("Error!", err, "error");
         }
         if (result) {
-          Swal("Updated!", result, "Success");
+          Swal("Updated!", result, "success");
         }
       });
     }
-
-    // let productSizeLength = parseFloat(ReactDOM.findDOMNode(this.refs.productSizeLength).value.trim());
-    // let productSizeWidth = parseFloat(ReactDOM.findDOMNode(this.refs.productSizeWidth).value.trim());
-    // let productSizeVolume = parseFloat(ReactDOM.findDOMNode(this.refs.productSizeVolume).value.trim());
-    // let productDescription = ReactDOM.findDOMNode(this.refs.productDescription).value.trim();
-    // let productImages = this.props.fileAdded;
   }
-  deleteProduct(event) {
+  toggleDeleteProduct(event) {
+    let self = this.props.product,
+        toggle = (self && self.deleted) ? "restore" : "delete",
+        toggleTitle = (self && self.deleted) ? "Restore" : "Delete";
     Swal({
-      title:"Delete Product",
-      text: "Are you sure you want to delete this product?",
-      type:"warning",
+      title: toggleTitle+" Product",
+      text: "Are you sure you want to "+toggle+" this product?",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#e5a434",
+      confirmButtonText: "Yes, "+toggle+" it!",
+      cancelButtonText: "No!",
+      closeOnConfirm: false,
+      closeOnCancel: true
+    }, function(isConfirm) {
+      if (isConfirm) {
+        Meteor.call("toggleDeleteProduct", self._id, function(err, result) {
+          if (err) {
+            swal("Oops..", err, "error");
+          }
+          if (result) {
+            swal("Product Deleted", result, "success");
+            FlowRouter.go('/admin');
+          }
+        });
+      }
     });
   }
   toggleShowOrHide(event) {
+    let self = this.props.product,
+        toggle = (self && self.hidden) ? "show" : "hide",
+        toggleTitle = (self && self.hidden) ? "Show" : "Hide";
     Swal({
-      title:"Hide Product",
-      text: "Are you sure you want to hide this product?",
-      type:"warning"
+      title: toggleTitle+" Product",
+      text: "Are you sure you want to "+toggle+" this product?",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#e5a434",
+      confirmButtonText: "Yes, "+toggle+" it!",
+      cancelButtonText: "No!",
+      closeOnConfirm: false,
+      closeOnCancel: true
+    }, function(isConfirm) {
+      if (confirm) {
+        Meteor.call("toggleHideProduct", self._id, function(err, result) {
+          if (err) {
+            swal("Oops..", err, "error");
+          }
+          if (result) {
+            swal("Product Hidden", result, "success");
+            FlowRouter.go('/admin');
+          }
+        });
+      }
     });
   }
   onUpdate(event) {
@@ -196,7 +245,7 @@ export default class EditProductDisplay extends React.Component {
     let elemValue = event.target.value.trim();
     let elemDataErrors = event.target.dataset.errors;
     let err = SGI.globalInputErrors(elemValue, elemDataErrors.split(','));
-    if (err){
+    if (err) {
       let erroMessage = err.join(" and ");
       document.getElementById(elemName).innerHTML = erroMessage;
     }
@@ -209,14 +258,24 @@ export default class EditProductDisplay extends React.Component {
     }
   }
   renderOptionsMenu() {
-    let hide;
+    let hideOption = <li></li>,
+        deleteOption = <li></li>;
     if (this.props.product && this.props.product.hidden) {
-      hide = <li data-toggle="tooltip" onClick={this.toggleShowOrHide.bind(this)} ref="toggleShowOrHide" data-placement="top" title="Show">
+      hideOption = <li data-toggle="tooltip" onClick={this.toggleShowOrHide.bind(this)} ref="toggleShowOrHide" data-placement="top" title="Show">
         <i className="fa fa-eye-slash fa-2x text-primary"></i>
       </li>
     } else {
-      hide = <li data-toggle="tooltip" onClick={this.toggleShowOrHide.bind(this)} ref="toggleShowOrHide" data-placement="top" title="Hide">
+      hideOption = <li data-toggle="tooltip" onClick={this.toggleShowOrHide.bind(this)} ref="toggleShowOrHide" data-placement="top" title="Hide">
         <i className="fa fa-eye fa-2x text-primary"></i>
+      </li>
+    }
+    if (this.props.product && this.props.product.deleted){
+      deleteOption = <li className="disabled" data-toggle="tooltip" onClick={this.toggleDeleteProduct.bind(this)} ref="deleteProduct" data-placement="top" title="Restore">
+        <i className="fa fa-refresh text-danger fa-2x"></i>
+      </li>
+    } else {
+      deleteOption = <li className="disabled" data-toggle="tooltip" onClick={this.toggleDeleteProduct.bind(this)} ref="deleteProduct" data-placement="top" title="Delete">
+        <i className="fa fa-trash text-danger fa-2x"></i>
       </li>
     }
     return <div className="col-md-12">
@@ -224,10 +283,8 @@ export default class EditProductDisplay extends React.Component {
         <li data-toggle="tooltip" onClick={this.saveProduct.bind(this)} ref="saveProduct" data-placement="top" title="Save">
           <i className="fa fa-check text-success fa-2x"></i>
         </li>
-        {hide}
-        <li data-toggle="tooltip" onClick={this.deleteProduct.bind(this)} ref="deleteProduct" data-placement="top" title="Delete">
-          <i className="fa fa-trash text-danger fa-2x"></i>
-        </li>
+        {hideOption}
+        {deleteOption}
       </ul>
     </div>
   }
@@ -252,9 +309,9 @@ export default EditProductDisplay = createContainer(props => {
     imageSub = null,
     productImage = null;
   if (sub.ready() && !_.isUndefined(product)) {
-    imageSub = Meteor.subscribe('productImagesById', product.imageIds);
+    imageSub = Meteor.subscribe('productImagesById', product.productImageId);
     if (imageSub.ready()) {
-      productImage = ProductImages.findOne({_id: product.imageIds});
+      productImage = ProductImages.findOne({_id: product.productImageId});
       product.image = productImage;
     }
   }
@@ -262,6 +319,6 @@ export default EditProductDisplay = createContainer(props => {
     productLoading: (!sub.ready() || _.isUndefined(product.image))
       ? true
       : false,
-    product: product,
+    product: product
   };
 }, EditProductDisplay);

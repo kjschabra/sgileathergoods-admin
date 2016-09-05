@@ -7,6 +7,8 @@ import AccountsUI from './views/accounts.jsx';
 import ProductsDisplay from './views/admin/products-display.jsx';
 import AddProductDisplay from './views/admin/add-product-display.jsx';
 import EditProductDisplay from './views/admin/edit-product-display.jsx';
+import HiddenProductsDisplay from './views/admin/hidden-products-display.jsx';
+import DeletedProductsDisplay from './views/admin/deleted-products-display.jsx';
 import Sidebar from './views/admin/sidebar.jsx';
 FlowRouter.route("/", {
   name: 'Home',
@@ -22,9 +24,10 @@ FlowRouter.route("/", {
 FlowRouter.route("/login", {
   name: 'Login',
   triggersEnter: [function(context, redirect) {
-    if (Meteor.userId())
-      FlowRouter.go('/admin');
-  }],
+      if (Meteor.userId())
+        FlowRouter.go('/admin');
+      }
+    ],
   action() {
     mount(LoginLayout, {content: <AccountsUI/>});
   }
@@ -63,6 +66,24 @@ adminRoutes.route('/edit-product/:productId', {
     mount(AdminLayout, {
       sidebar: <Sidebar/>,
       content: <EditProductDisplay productId={params.productId}/>
+    });
+  }
+});
+adminRoutes.route('/hidden-products', {
+  name: "AdminHiddenProducts",
+  action(params) {
+    mount(AdminLayout, {
+      sidebar: <Sidebar/>,
+      content: <HiddenProductsDisplay />
+    });
+  }
+});
+adminRoutes.route('/deleted-products', {
+  name: "AdminDeletedProducts",
+  action(params) {
+    mount(AdminLayout, {
+      sidebar: <Sidebar/>,
+      content: <DeletedProductsDisplay />
     });
   }
 });
