@@ -1,125 +1,151 @@
-import React, {Component, PropTypes} from 'react';
+import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import FileInput from 'react-file-input';
 import Swal from 'sweetalert';
-import {createContainer} from 'meteor/react-meteor-data';
-import {ProductImages} from '../../../imports/collections.js';
-import {Random} from 'meteor/random';
-import RenderForm from './render-form.jsx';
-import Product from './product.jsx';
+import { createContainer } from 'meteor/react-meteor-data';
+import { ProductImages, SGIProductCollection, ProductType, ProductGender } from '../../../imports/collections.js';
+import { Random } from 'meteor/random';
+import { RenderForm } from './render-form.jsx';
+import { Product } from './product.jsx';
 import Loading from '../components/loading.jsx';
-export default class AddProductDisplay extends React.Component {
+
+export class AddProductDisplay extends React.Component {
   componentDidMount() {
     $('[data-toggle="tooltip"]').tooltip();
     return null;
   }
   formData(productData) {
-    let formData = [
-      {
-        labelValue: "Product Name",
+    let self = this;
+    let formData = [{
+      labelValue: "Product Name",
+      value: "",
+      label: "Product Name",
+      tagDivClass: "col-md-10",
+      tagClass: "form-control",
+      labelClass: "col-sm-2",
+      tagType: "text",
+      tag: "input",
+      placeholder: "Red Handbag",
+      errors: ["empty"],
+      ref: "productName"
+    }, {
+      labelValue: "Product Size",
+      labelClass: "col-sm-2",
+      additionalTag: [{
         value: "",
-        label: "Product Name",
-        tagDivClass: "col-md-10",
-        tagClass: "form-control",
-        labelClass: "col-sm-2",
-        tagType: "text",
-        tag: "input",
-        placeholder: "Red Handbag",
-        errors: ["empty"],
-        ref: "productName"
-      }, {
-        labelValue: "Product Size",
-        labelClass: "col-sm-2",
-        additionalTag: [
-          {
-            value: "",
-            tagDivClass: "col-md-3",
-            tagClass: "form-control",
-            tagType: "text",
-            tag: "input",
-            placeholder: "24",
-            errors: [
-              "empty", "number"
-            ],
-            ref: "productSizeLength"
-          }, {
-            labelValue: "Product Width",
-            value: "",
-            tagDivClass: "col-md-3",
-            tagClass: "form-control",
-            tagType: "text",
-            labelClass: "col-md-1",
-            tag: "input",
-            placeholder: "10",
-            errors: [
-              "empty", "number"
-            ],
-            ref: "productSizeWidth"
-          }, {
-            labelValue: "Product Volume",
-            value: "",
-            tagDivClass: "col-md-3",
-            tagClass: "form-control",
-            tagType: "text",
-            labelClass: "col-md-1",
-            tag: "input",
-            placeholder: "8",
-            errors: [
-              "empty", "number"
-            ],
-            ref: "productSizeVolume"
-          }
-        ]
-      }, {
-        labelValue: "Product Color",
-        labelClass: "col-md-2",
-        value: "",
-        tagDivClass: "col-md-10",
-        tagClass: "form-control",
-        tag: "input",
-        tagType: "text",
-        placeholder: "Black, Red, Brown",
-        errors: ["empty"],
-        ref: "productColor"
-      }, {
-        labelValue: "Product Price",
-        labelClass: "col-md-2",
-        value: "",
-        tagDivClass: "col-md-10",
+        tagDivClass: "col-md-3",
         tagClass: "form-control",
         tagType: "text",
         tag: "input",
-        tagType: "text",
-        placeholder: "$130 CAD",
-        errors: ["empty"],
-        ref: "productPrice"
+        placeholder: "24",
+        errors: [
+          "empty", "number"
+        ],
+        ref: "productSizeLength"
       }, {
-        labelValue: "Product Description",
+        labelValue: "Product Width",
         value: "",
-        tagDivClass: "col-md-10",
+        tagDivClass: "col-md-3",
         tagClass: "form-control",
         tagType: "text",
-        labelClass: "col-md-2",
-        tag: "textarea",
-        placeholder: "This handbag can carry...",
-        errors: ["empty"],
-        ref: "productDescription"
-      }, {
-        labelValue: "Product Image",
-        value: "",
-        tagDivClass: "col-md-5",
-        tagClass: "form-control",
-        tagType: "file",
-        labelClass: "col-md-2",
+        labelClass: "col-md-1",
         tag: "input",
-        placeholder: "Select an Image",
-        errors: ["image"],
-        ref: "productImage",
-      }
-    ];
+        placeholder: "10",
+        errors: [
+          "empty", "number"
+        ],
+        ref: "productSizeWidth"
+      }, {
+        labelValue: "Product Volume",
+        value: "",
+        tagDivClass: "col-md-3",
+        tagClass: "form-control",
+        tagType: "text",
+        labelClass: "col-md-1",
+        tag: "input",
+        placeholder: "8",
+        errors: [
+          "empty", "number"
+        ],
+        ref: "productSizeVolume"
+      }]
+    }, {
+      labelValue: "Product Color",
+      labelClass: "col-md-2",
+      value: "",
+      tagDivClass: "col-md-10",
+      tagClass: "form-control",
+      tag: "input",
+      tagType: "text",
+      placeholder: "Black, Red, Brown",
+      errors: ["empty"],
+      ref: "productColor"
+    }, {
+      labelValue: "Product Price",
+      labelClass: "col-md-2",
+      value: "",
+      tagDivClass: "col-md-10",
+      tagClass: "form-control",
+      tagType: "text",
+      tag: "input",
+      tagType: "text",
+      placeholder: "$130 CAD",
+      errors: ["empty"],
+      ref: "productPrice"
+    }, {
+      labelValue: "Product Description",
+      value: "",
+      tagDivClass: "col-md-10",
+      tagClass: "form-control",
+      tagType: "text",
+      labelClass: "col-md-2",
+      tag: "textarea",
+      placeholder: "This handbag can carry...",
+      errors: ["empty"],
+      ref: "productDescription"
+    }, {
+      labelValue: "Product Collection",
+      labelClass: "col-sm-2",
+      additionalTag: [{
+        value: self.props.sgiProductCollection,
+        tagDivClass: "col-md-3",
+        tagClass: "form-control",
+        tagType: "select",
+        tag: "select",
+        errors: ["empty"],
+        ref: "collection"
+      }, {
+        value: self.props.productType,
+        tagDivClass: "col-md-3",
+        tagClass: "form-control",
+        tagType: "select",
+        tag: "select",
+        errors: ["empty"],
+        ref: "productType"
+      }, {
+        value: self.props.productGender,
+        tagDivClass: "col-md-3",
+        tagClass: "form-control",
+        tagType: "select",
+        tag: "select",
+        errors: ["empty"],
+        ref: "productGender"
+      }]
+    }, {
+      labelValue: "Product Image",
+      value: "",
+      tagDivClass: "col-md-5",
+      tagClass: "form-control",
+      tagType: "file",
+      labelClass: "col-md-2",
+      tag: "input",
+      placeholder: "Select an Image",
+      errors: ["image"],
+      ref: "productImage",
+    }];
     return formData;
   }
-  handleFormSubmit(){
+  handleFormSubmit() {
     event.preventDefault();
     let hasErrors = false;
     let formData = this.formData(this.props.product);
@@ -134,7 +160,7 @@ export default class AddProductDisplay extends React.Component {
             let elemValue = document.getElementsByName(tag.ref)[0].value.trim();
             additionErr.message = SGI.globalInputErrors(elemValue, tag.errors);
             additionErr.tag = tag.ref;
-            if (tag.tagType !== "file"){
+            if (tag.tagType !== "file") {
               additionErr.value = elemValue;
             } else {
               additionErr.value = document.getElementsByName(tag.ref)[0].files;
@@ -147,11 +173,11 @@ export default class AddProductDisplay extends React.Component {
           }
         });
       } else {
-        if ((formGet.tag === "input" || formGet.tag === "textarea") && formGet.errors ) {
+        if ((formGet.tag === "input" || formGet.tag === "textarea") && formGet.errors) {
           let elemValue = document.getElementsByName(formGet.ref)[0].value.trim();
           err.message = SGI.globalInputErrors(elemValue, formGet.errors);
           err.tag = formGet.ref;
-          if (formGet.tagType !== "file"){
+          if (formGet.tagType !== "file") {
             err.value = elemValue;
           } else {
             err.value = document.getElementsByName(formGet.ref)[0].files;
@@ -174,14 +200,14 @@ export default class AddProductDisplay extends React.Component {
       }
     });
     if (!hasErrors) {
-      let productImage = _.where(formValues, {tag:"productImage"});
-      let imageUpload = ProductImages.insert(productImage[0].value[0], function(err, fileObj){
+      let productImage = _.where(formValues, { tag: "productImage" });
+      let imageUpload = ProductImages.insert(productImage[0].value[0], function(err, fileObj) {
         if (err) {
           console.log(err);
-          Swal("Error", err,"error");
+          Swal("Error", err, "error");
         }
         if (fileObj) {
-          let productImage = [{tag: "productImageId", value:fileObj._id}];
+          let productImage = [{ tag: "productImageId", value: fileObj._id }];
           formValues = _.union(formValues, productImage);
 
           Meteor.call("addProduct", formValues, function(err, result) {
@@ -190,14 +216,14 @@ export default class AddProductDisplay extends React.Component {
             }
             if (result) {
               Swal({
-                title:"Updated!",
-                text:result,
-                type:"success",
+                title: "Updated!",
+                text: result,
+                type: "success",
                 showCancelButton: false,
                 confirmButtonColor: "#0066d9",
                 confirmButtonText: "OK!",
                 closeOnConfirm: true,
-              }, function(){
+              }, function() {
                 FlowRouter.go('/admin');
               });
 
@@ -225,17 +251,48 @@ export default class AddProductDisplay extends React.Component {
     }
   }
   render() {
+    var renderForm = undefined;
+    if (this.props.loading) {
+      renderForm = <Loading />
+    } else {
+      renderForm = <RenderForm formClass="form-horizontal" onUpdate={this.onUpdate} formData={this.formData()}/>
+    }
+
     return <div className="row">
       <h3 className="text-center lead text-muted">Add Product</h3>
       {this.renderAddProductMenu()}
-      <RenderForm formClass="form-horizontal" onUpdate={this.onUpdate} formData={this.formData()}/>
+      {renderForm}
     </div>
   }
 }
 export default AddProductDisplay = createContainer(props => {
   // props here will have `main`, passed from the router
   // anything we return from this function will be *added* to it
+  let productCollectionSub = Meteor.subscribe('sgiProductCollection');
+  let productTypeSub = Meteor.subscribe('productType');
+  let productGenderSub = Meteor.subscribe('productGender');
+  let sgiProductCollection = undefined;
+  let productType = undefined;
+  let productGender = undefined;
+  if (productCollectionSub.ready()) {
+    sgiProductCollection = SGIProductCollection.find().fetch().map(function(collection) {
+      return { value: collection._id, label: collection.name, selected: false };
+    });
+  }
+  if (productTypeSub.ready()) {
+    productType = ProductType.find().fetch().map(function(type) {
+      return { value: type._id, label: type.name, selected: false };
+    })
+  }
+  if (productGenderSub.ready()) {
+    productGender = ProductGender.find().fetch().map(function(gender) {
+      return { value: gender._id, label: gender.name, selected: false };
+    });
+  }
   return {
-    loading:false
+    loading: !productCollectionSub.ready() || !productTypeSub.ready() || !productGenderSub.ready() || false,
+    sgiProductCollection: sgiProductCollection,
+    productType: productType,
+    productGender: productGender
   };
 }, AddProductDisplay);

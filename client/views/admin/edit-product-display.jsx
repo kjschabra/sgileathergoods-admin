@@ -1,130 +1,154 @@
-import React, {Component, PropTypes} from 'react';
+import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
-import {createContainer} from 'meteor/react-meteor-data';
-import {ProductsCollection, ProductImages} from '../../../imports/collections.js';
-import ProductFormDisplay from './action-product-form-display.jsx';
+import { createContainer } from 'meteor/react-meteor-data';
+import { ProductsCollection, ProductImages, SGIProductCollection, ProductType, ProductGender } from '../../../imports/collections.js';
+import { ProductFormDisplay } from './action-product-form-display.jsx';
 import Swal from 'sweetalert';
-import RenderForm from './render-form.jsx';
-import Product from './product.jsx';
+import { RenderForm } from './render-form.jsx';
+import { Product } from './product.jsx';
 import Loading from '../components/loading.jsx';
-export default class EditProductDisplay extends React.Component {
+
+export class EditProductDisplay extends React.Component {
   componentDidMount() {
     $('[data-toggle="tooltip"]').tooltip();
     return null;
   }
   formData(productData) {
+    let self = this;
     if (this.props.product && !_.isUndefined(this.props.product)) {
-      let formData = [
-        {
-          labelValue: "Product Name",
-          value: productData.productName,
-          label: "Product Name",
-          tagDivClass: "col-md-10",
-          tagClass: "form-control",
-          labelClass: "col-sm-2",
-          tagType: "text",
-          tag: "input",
-          placeholder: "Red Handbag",
-          errors: ["empty"],
-          ref: "productName"
-        }, {
-          labelValue: "Product Size",
-          labelClass: "col-sm-2",
-          additionalTag: [
-            {
-              value: productData.productSizeLength,
-              tagDivClass: "col-md-3",
-              tagClass: "form-control",
-              tagType: "text",
-              tag: "input",
-              placeholder: "24",
-              errors: [
-                "empty", "number"
-              ],
-              ref: "productSizeLength"
-            }, {
-              labelValue: "Product Width",
-              value: productData.productSizeWidth,
-              tagDivClass: "col-md-3",
-              tagClass: "form-control",
-              tagType: "text",
-              labelClass: "col-md-1",
-              tag: "input",
-              placeholder: "10",
-              errors: [
-                "empty", "number"
-              ],
-              ref: "productSizeWidth"
-            }, {
-              labelValue: "Product Volume",
-              value: productData.productSizeVolume,
-              tagDivClass: "col-md-3",
-              tagClass: "form-control",
-              tagType: "text",
-              labelClass: "col-md-1",
-              tag: "input",
-              placeholder: "8",
-              errors: [
-                "empty", "number"
-              ],
-              ref: "productSizeVolume"
-            }
-          ]
-        }, {
-          labelValue: "Product Color",
-          labelClass: "col-md-2",
-          value: productData.productColor,
-          tagDivClass: "col-md-10",
-          tagClass: "form-control",
-          tag: "input",
-          tagType: "text",
-          placeholder: "Black, Red, Brown",
-          errors: ["empty"],
-          ref: "productColor"
-        }, {
-          labelValue: "Product Price",
-          labelClass: "col-md-2",
-          value: productData.productPrice,
-          tagDivClass: "col-md-10",
+      let formData = [{
+        labelValue: "Product Name",
+        value: productData.productName,
+        label: "Product Name",
+        tagDivClass: "col-md-10",
+        tagClass: "form-control",
+        labelClass: "col-sm-2",
+        tagType: "text",
+        tag: "input",
+        placeholder: "Red Handbag",
+        errors: ["empty"],
+        ref: "productName"
+      }, {
+        labelValue: "Product Size",
+        labelClass: "col-sm-2",
+        additionalTag: [{
+          value: productData.productSizeLength,
+          tagDivClass: "col-md-3",
           tagClass: "form-control",
           tagType: "text",
           tag: "input",
-          tagType: "text",
-          placeholder: "$130 CAD",
-          errors: ["empty"],
-          ref: "productPrice"
+          placeholder: "24",
+          errors: [
+            "empty", "number"
+          ],
+          ref: "productSizeLength"
         }, {
-          labelValue: "Product Description",
-          value: productData.productDescription,
-          tagDivClass: "col-md-10",
+          labelValue: "Product Width",
+          value: productData.productSizeWidth,
+          tagDivClass: "col-md-3",
           tagClass: "form-control",
           tagType: "text",
-          labelClass: "col-md-2",
-          tag: "textarea",
-          placeholder: "This handbag can carry...",
-          errors: ["empty"],
-          ref: "productDescription"
+          labelClass: "col-md-1",
+          tag: "input",
+          placeholder: "10",
+          errors: [
+            "empty", "number"
+          ],
+          ref: "productSizeWidth"
         }, {
-          labelValue: "Product Image",
-          value: productData.image.original.name,
+          labelValue: "Product Volume",
+          value: productData.productSizeVolume,
+          tagDivClass: "col-md-3",
+          tagClass: "form-control",
+          tagType: "text",
+          labelClass: "col-md-1",
+          tag: "input",
+          placeholder: "8",
+          errors: [
+            "empty", "number"
+          ],
+          ref: "productSizeVolume"
+        }]
+      }, {
+        labelValue: "Product Color",
+        labelClass: "col-md-2",
+        value: productData.productColor,
+        tagDivClass: "col-md-10",
+        tagClass: "form-control",
+        tag: "input",
+        tagType: "text",
+        placeholder: "Black, Red, Brown",
+        errors: ["empty"],
+        ref: "productColor"
+      }, {
+        labelValue: "Product Price",
+        labelClass: "col-md-2",
+        value: productData.productPrice,
+        tagDivClass: "col-md-10",
+        tagClass: "form-control",
+        tagType: "text",
+        tag: "input",
+        tagType: "text",
+        placeholder: "$130 CAD",
+        errors: ["empty"],
+        ref: "productPrice"
+      }, {
+        labelValue: "Product Collection",
+        labelClass: "col-sm-2",
+        additionalTag: [{
+          value: self.props.sgiProductCollection,
+          tagDivClass: "col-md-3",
+          tagClass: "form-control",
+          tagType: "select",
+          tag: "select",
+          errors: ["empty"],
+          ref: "collection"
+        }, {
+          value: self.props.productType,
+          tagDivClass: "col-md-3",
+          tagClass: "form-control",
+          tagType: "select",
+          tag: "select",
+          errors: ["empty"],
+          ref: "productType"
+        }, {
+          value: self.props.productGender,
+          tagDivClass: "col-md-3",
+          tagClass: "form-control",
+          tagType: "select",
+          tag: "select",
+          errors: ["empty"],
+          ref: "productGender"
+        }]
+      }, {
+        labelValue: "Product Description",
+        value: productData.productDescription,
+        tagDivClass: "col-md-10",
+        tagClass: "form-control",
+        tagType: "text",
+        labelClass: "col-md-2",
+        tag: "textarea",
+        placeholder: "This handbag can carry...",
+        errors: ["empty"],
+        ref: "productDescription"
+      }, {
+        labelValue: "Product Image",
+        value: productData.image.original.name,
+        tagDivClass: "col-md-5",
+        tagClass: "form-control",
+        tagType: "file",
+        labelClass: "col-md-2",
+        tag: "input",
+        placeholder: "Select an Image",
+        ref: "productImage",
+        additionalTag: [{
+          tag: "img",
+          alt: productData.image.original.name,
+          tagClass: "img-responsive thumbnail",
           tagDivClass: "col-md-5",
-          tagClass: "form-control",
-          tagType: "file",
-          labelClass: "col-md-2",
-          tag: "input",
-          placeholder: "Select an Image",
-          ref: "productImage",
-          additionalTag: [
-            {
-              tag: "img",
-              alt: productData.image.original.name,
-              tagClass: "img-responsive thumbnail",
-              tagDivClass: "col-md-5",
-              src: productData.image.url(store = "images")
-            }
-          ]
-        }
-      ];
+          src: productData.image.url(store = "images")
+        }]
+      }];
       return formData;
     }
   }
@@ -138,7 +162,7 @@ export default class EditProductDisplay extends React.Component {
       let err = {};
       if (formGet && formGet.additionalTag && formGet.additionalTag.length > 0) {
         formGet.additionalTag.map(function(tag, i) {
-          if ((tag.tag === "input" || tag.tag === "textarea") && tag.errors) {
+          if ((tag.tag === "input" || tag.tag === "textarea" || tag.tag === "select") && tag.errors) {
             let additionErr = {};
             let elemValue = document.getElementsByName(tag.ref)[0].value.trim();
             additionErr.message = SGI.globalInputErrors(elemValue, tag.errors);
@@ -186,15 +210,15 @@ export default class EditProductDisplay extends React.Component {
   }
   toggleDeleteProduct(event) {
     let self = this.props.product,
-        toggle = (self && self.deleted) ? "restore" : "delete",
-        toggleTitle = (self && self.deleted) ? "Restore" : "Delete";
+      toggle = (self && self.deleted) ? "restore" : "delete",
+      toggleTitle = (self && self.deleted) ? "Restore" : "Delete";
     Swal({
-      title: toggleTitle+" Product",
-      text: "Are you sure you want to "+toggle+" this product?",
+      title: toggleTitle + " Product",
+      text: "Are you sure you want to " + toggle + " this product?",
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#e5a434",
-      confirmButtonText: "Yes, "+toggle+" it!",
+      confirmButtonText: "Yes, " + toggle + " it!",
       cancelButtonText: "No!",
       closeOnConfirm: false,
       closeOnCancel: true
@@ -214,15 +238,15 @@ export default class EditProductDisplay extends React.Component {
   }
   toggleShowOrHide(event) {
     let self = this.props.product,
-        toggle = (self && self.hidden) ? "show" : "hide",
-        toggleTitle = (self && self.hidden) ? "Show" : "Hide";
+      toggle = (self && self.hidden) ? "show" : "hide",
+      toggleTitle = (self && self.hidden) ? "Show" : "Hide";
     Swal({
-      title: toggleTitle+" Product",
-      text: "Are you sure you want to "+toggle+" this product?",
+      title: toggleTitle + " Product",
+      text: "Are you sure you want to " + toggle + " this product?",
       type: "warning",
       showCancelButton: true,
       confirmButtonColor: "#e5a434",
-      confirmButtonText: "Yes, "+toggle+" it!",
+      confirmButtonText: "Yes, " + toggle + " it!",
       cancelButtonText: "No!",
       closeOnConfirm: false,
       closeOnCancel: true
@@ -259,7 +283,7 @@ export default class EditProductDisplay extends React.Component {
   }
   renderOptionsMenu() {
     let hideOption = <li></li>,
-        deleteOption = <li></li>;
+      deleteOption = <li></li>;
     if (this.props.product && this.props.product.hidden) {
       hideOption = <li data-toggle="tooltip" onClick={this.toggleShowOrHide.bind(this)} ref="toggleShowOrHide" data-placement="top" title="Show">
         <i className="fa fa-eye-slash fa-2x text-primary"></i>
@@ -269,7 +293,7 @@ export default class EditProductDisplay extends React.Component {
         <i className="fa fa-eye fa-2x text-primary"></i>
       </li>
     }
-    if (this.props.product && this.props.product.deleted){
+    if (this.props.product && this.props.product.deleted) {
       deleteOption = <li className="disabled" data-toggle="tooltip" onClick={this.toggleDeleteProduct.bind(this)} ref="deleteProduct" data-placement="top" title="Restore">
         <i className="fa fa-refresh text-danger fa-2x"></i>
       </li>
@@ -304,21 +328,60 @@ EditProductDisplay.propTypes = {
 export default EditProductDisplay = createContainer(props => {
   // props here will have `main`, passed from the router
   // anything we return from this function will be *added* to it
-  let sub = Meteor.subscribe('productById', props.productId),
-    product = ProductsCollection.findOne({_id: props.productId}),
-    imageSub = null,
-    productImage = null;
+  // props here will have `main`, passed from the router
+  // anything we return from this function will be *added* to it
+  let sub = Meteor.subscribe('productById', props.productId);
+  let productCollectionSub = Meteor.subscribe('sgiProductCollection');
+  let productTypeSub = Meteor.subscribe('productType');
+  let productGenderSub = Meteor.subscribe('productGender');
+
+  let sgiProductCollection = undefined;
+  let product = ProductsCollection.findOne({ _id: props.productId });
+  let productType = undefined;
+  let productGender = undefined;
+  let imageSub = undefined;
+  let productImage = undefined;
+
   if (sub.ready() && !_.isUndefined(product)) {
     imageSub = Meteor.subscribe('productImagesById', product.productImageId);
     if (imageSub.ready()) {
-      productImage = ProductImages.findOne({_id: product.productImageId});
+      productImage = ProductImages.findOne({ _id: product.productImageId });
       product.image = productImage;
+    }
+
+    if (productCollectionSub.ready()) {
+      sgiProductCollection = SGIProductCollection.find().fetch().map(function(collection) {
+        let selected = false;
+        if (product && product.collection && product.collection === collection._id) {
+          selected = true;
+        }
+        return { value: collection._id, label: collection.name, selected: selected };
+      });
+    }
+    if (productTypeSub.ready()) {
+      productType = ProductType.find().fetch().map(function(type) {
+        let selected = false;
+        if (product && product.productType && product.productType === type._id) {
+          selected = true;
+        }
+        return { value: type._id, label: type.name, selected: selected };
+      })
+    }
+    if (productGenderSub.ready()) {
+      productGender = ProductGender.find().fetch().map(function(gender) {
+        let selected = false;
+        if (product && product.productGender && product.productGender === gender._id) {
+          selected = true;
+        }
+        return { value: gender._id, label: gender.name, selected: selected };
+      });
     }
   }
   return {
-    productLoading: (!sub.ready() || _.isUndefined(product.image))
-      ? true
-      : false,
-    product: product
+    productLoading: !sub.ready() || !productCollectionSub.ready() || !productTypeSub.ready() || !productGenderSub.ready() || _.isUndefined(productImage),
+    product: product,
+    sgiProductCollection: sgiProductCollection,
+    productType: productType,
+    productGender: productGender
   };
 }, EditProductDisplay);

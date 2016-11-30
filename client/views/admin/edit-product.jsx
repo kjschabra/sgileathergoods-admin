@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import {createContainer} from 'meteor/react-meteor-data';
-export default class EditProduct extends React.Component {
+
+export class EditProduct extends React.Component {
   componentDidMount() {
     $('[data-toggle="tooltip"]').tooltip();
     return null;

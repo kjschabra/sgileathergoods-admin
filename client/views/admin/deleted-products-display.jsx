@@ -1,18 +1,18 @@
-import React, {Component, PropTypes} from 'react';
-import {createContainer} from 'meteor/react-meteor-data';
-import {ProductsCollection} from '../../../imports/collections.js'
+import React, { Component, PropTypes } from 'react';
+import { createContainer } from 'meteor/react-meteor-data';
+import { ProductsCollection } from '../../../imports/collections.js'
 
-import Product from './product.jsx';
+import { Product } from './product.jsx';
 import Loading from '../components/loading.jsx';
 
-export default class DeletedProductsDisplay extends React.Component {
+export class DeletedProductsDisplay extends React.Component {
   componentDidMount() {
     return null;
   }
   renderProducts() {
     if (this.props.productsLoading) {
       return <Loading />
-    }else {
+    } else {
       return this.props.products.map((product) => (
         <Product key={product._id} data={product} />
       ));
@@ -32,9 +32,9 @@ export default DeletedProductsDisplay = createContainer(props => {
   // props here will have `main`, passed from the router
   // anything we return from this function will be *added* to it
   let sub = Meteor.subscribe('deletedProductsCollection'),
-      product = ProductsCollection.find({deleted:true, hidden:false}).fetch();
+    product = ProductsCollection.find({ deleted: true, hidden: false }).fetch();
   return {
-    products:product,
+    products: product,
     productsLoading: !sub.ready(),
   };
 }, DeletedProductsDisplay);

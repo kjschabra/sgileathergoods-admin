@@ -8,8 +8,11 @@ var imageStore = new FS.Store.GridFS("images", {
                         // Default: 2MB. Reasonable range: 512KB - 4MB
 });
 
-export const ProductsCollection = new Mongo.Collection('products');
-export const ProductImages = new FS.Collection("productImages", {
+export const ProductsCollection   = new Mongo.Collection('products');
+export const SGIProductCollection = new Mongo.Collection('productCollection');
+export const ProductType          = new Mongo.Collection('productType');
+export const ProductGender        = new Mongo.Collection('productGender');
+export const ProductImages        = new FS.Collection("productImages", {
   stores: [imageStore],
   filter: {
     allow: {

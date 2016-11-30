@@ -3,10 +3,13 @@ import {Meteor} from 'meteor/meteor';
 // define and export our Layout component
 export const LoginLayout = ({content}) => (
   <div className="container-fluid">
-    <h1 className="text-center">Admin Platform</h1>
-    <hr/>
-    <div className="row">
-      <div className="col-md-12">{content}</div>
+    <div className="row" style={{marginTop: 2+'em'}}>
+      <div className="col-md-12">
+        <p className="lead text-center">SGI Leather Goods Admin</p>
+      </div>
+      <div className="col-md-12">
+        {content}
+      </div>
     </div>
   </div>
 );
@@ -25,15 +28,15 @@ export const AdminLayout = ({sidebar, content}) => (
       </div>
       <div id="navbar" className="navbar-collapse collapse">
         <ul className="nav navbar-nav navbar-right">
-          <li><a href=""><i className="fa fa-sign-out"></i>Log-Out</a></li>
+          <li><a href='/logout'><i className="fa fa-sign-out"></i>Log-Out</a></li>
         </ul>
       </div>
     </div>
   </nav>
-  <div className="container">
-    <div className="row" style={{marginTop: 50+"px"}}>
-      <div className="col-md-2 sidebar">{sidebar}</div>
-      <div className="col-md-10 main">{content}</div>
+  <div className="container-fluid">
+    <div className="row">
+      <div className="col-sm-3 col-md-2 sidebar" style={{marginTop:50+'px'}}>{sidebar}</div>
+      <div className="col-sm-9 col-md-10 main" style={{marginTop:50+'px'}}>{content}</div>
     </div>
   </div>
   </div>

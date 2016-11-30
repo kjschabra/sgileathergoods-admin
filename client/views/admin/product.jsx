@@ -1,13 +1,31 @@
-import React, {Component, PropTypes} from 'react';
-import {Meteor} from 'meteor/meteor';
-import {createContainer} from 'meteor/react-meteor-data';
-import {ProductImages} from '../../../imports/collections.js';
+import React, { Component, PropTypes } from 'react';
+import { Meteor } from 'meteor/meteor';
+import { createContainer } from 'meteor/react-meteor-data';
+import { ProductImages } from '../../../imports/collections.js';
 import Loading from '../components/loading.jsx';
 import Swal from 'sweetalert';
-export default class Products extends React.Component {
+
+export class Product extends React.Component {
   componentDidMount() {
     $('[data-toggle="tooltip"]').tooltip();
     return null;
+  }
+  getProductImgClass() {
+    let self = this;
+    if (self.props.productCollection && self.props.data) {
+      let obj = _.where(self.props.productCollection, { _id: self.props.data.collection });
+      if (obj[0] && !_.isEmpty(obj[0])) {
+        if (obj[0].name === "Paris Collection") {
+          return "collection paris-collection-img-border";
+        } else if (obj[0].name === "Safari Collection") {
+          return "collection safari-collection-img-border";
+        } else if (obj[0].name === "Eternity Collection") {
+          return "collection eternity-collection-img-border";
+        } else {
+          return "collection sgi-brand-img-border";
+        }
+      }
+    }
   }
   toggleDeleteProduct(event) {
     let self = this.props.data;
@@ -59,14 +77,31 @@ export default class Products extends React.Component {
     if (this.props.imageLoading) {
       return <Loading/>;
     } else {
-      return <img src={this.props.image.url(store = "images")} alt="" className="img-responsive thumbnail" />;
+      return <img onClick={this.props.loadModal}
+                  data-product-id={this.props.data._id}
+                  data-image-id={this.props.image._id}
+                  src={this.props.image.url(store = "images")}
+                  alt=""
+                  className={this.getProductImgClass()+ " img-responsive thumbnail "}
+                  />;
     }
   }
-	displaySize() {
-		if (this.props.data && this.props.data.productSizeLength && this.props.data.productSizeLength !== "0" && this.props.data.productSizeWidth && this.props.data.productSizeWidth !== "0" && this.props.data.productSizeVolume && this.props.data.productSizeVolume !== "0") {
-			return this.props.data.productSizeLength+"in x "+this.props.data.productSizeWidth+"in x "+this.props.data.productSizeVolume+"in"
-		}
-	}
+  displaySize() {
+    var length = "",
+      width = "",
+      volume = "";
+    if (this.props.data && this.props.data.productSizeLength && this.props.data.productSizeLength !== "0") {
+      length = this.props.data.productSizeLength + "in";
+    }
+    if (this.props.data && this.props.data.productSizeWidth && this.props.data.productSizeWidth !== "0") {
+      width = " x " + this.props.data.productSizeWidth + "in";
+    }
+    if (this.props.data && this.props.data.productSizeVolume && this.props.data.productSizeVolume !== "0") {
+      volume = " x " + this.props.data.productSizeVolume + "in";
+    }
+
+    return length + " " + width + " " + volume;
+  }
   render() {
     return <div className="col-md-3">
       {this.renderEditMenu()}
@@ -87,10 +122,8 @@ export default class Products extends React.Component {
     </div>
   }
 }
-// Products.propTypes = {
-//
-// }
-export default Products = createContainer(props => {
+
+export default Product = createContainer(props => {
   // props here will have `main`, passed from the router
   // anything we return from this function will be *added* to it
   let imageIds = props.data.productImageId,
@@ -99,9 +132,9 @@ export default Products = createContainer(props => {
       data: []
     };
   let sub = Meteor.subscribe('productImagesById', imageIds);
-  let data = ProductImages.findOne({_id: imageIds});
+  let data = ProductImages.findOne({ _id: imageIds });
   return {
     imageLoading: !sub.ready(),
     image: data
   };
-}, Products);
+}, Product);

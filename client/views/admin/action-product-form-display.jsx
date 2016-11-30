@@ -1,13 +1,13 @@
-import React, {Component, PropTypes} from 'react';
+import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import FileInput from 'react-file-input';
 import Swal from 'sweetalert';
-import {createContainer} from 'meteor/react-meteor-data';
-import {ProductImages} from '../../../imports/collections.js';
-import {Random} from 'meteor/random';
-import Product from './product.jsx';
+import { createContainer } from 'meteor/react-meteor-data';
+import { ProductImages } from '../../../imports/collections.js';
+import { Random } from 'meteor/random';
+import { Product } from './product.jsx';
 import Loading from '../components/loading.jsx';
-export default class ProductFormDisplay extends React.Component {
+export class ProductFormDisplay extends React.Component {
   componentDidMount() {
     return null;
   }
@@ -193,38 +193,38 @@ export default ProductFormDisplay = createContainer(props => {
     image;
   if (props.data.imageIds && !_.isEmpty(props.data.imageIds)) {
     sub = Meteor.subscribe("productImagesById", props.data.imageIds);
-    image = ProductImages.findOne({_id: props.data.imageIds});
+    image = ProductImages.findOne({ _id: props.data.imageIds });
   }
   return {
     errors: {
       productName: {
         error: true,
-        val:"",
+        val: "",
         errorDesc: globalError.empty
       },
       productSizeLength: {
         error: true,
-        val:"",
+        val: "",
         errorDesc: globalError.empty + globalError.join + globalError.number
       },
       productSizeWidth: {
         error: true,
-        val:"",
+        val: "",
         errorDesc: globalError.empty + globalError.join + globalError.number
       },
       productSizeVolume: {
         error: true,
-        val:"",
+        val: "",
         errorDesc: globalError.empty + globalError.join + globalError.number
       },
       productDescription: {
         error: true,
-        val:"",
+        val: "",
         errorDesc: globalError.empty
       },
       productImage: {
         error: true,
-        val:"",
+        val: "",
         errorDesc: globalError.image
       }
     },

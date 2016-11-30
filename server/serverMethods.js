@@ -1,7 +1,7 @@
-import {Mongo} from 'meteor/mongo';
-import {ProductsCollection, ProductImages} from '../imports/collections.js';
-import {Meteor} from 'meteor/meteor';
-import {check} from 'meteor/check';
+import { Mongo } from 'meteor/mongo';
+import { ProductsCollection, ProductImages } from '../imports/collections.js';
+import { Meteor } from 'meteor/meteor';
+import { check } from 'meteor/check';
 
 Meteor.methods({
   addProduct(formValues) {
@@ -13,13 +13,13 @@ Meteor.methods({
     let processed = true;
     let error;
     let product = {
-      hidden:false,
-      deleted:false,
+      hidden: false,
+      deleted: false,
       addedOn: new Date(),
     };
 
     formValues.map(function(values) {
-      if (values && values.tag && values.value && !_.isUndefined(values.tag) && !_.isEmpty(values) && !_.isArray(values.value) ) {
+      if (values && values.tag && values.value && !_.isUndefined(values.tag) && !_.isEmpty(values) && !_.isArray(values.value) && !_.isObject(values.value) ) {
         product[values.tag] = values.value;
       }
     });
@@ -45,7 +45,6 @@ Meteor.methods({
     let processed = true;
     let error;
     let product = {};
-
     formValues.map(function(values) {
       if (values && !_.isUndefined(values.tag) && _.isString(values.value)) {
         product[values.tag] = values.value;
@@ -54,7 +53,7 @@ Meteor.methods({
     try {
       ProductsCollection.update({
         _id: productId
-      }, {$set: product});
+      }, { $set: product });
     } catch (e) {
       console.log("errorUpdatingProduct", e);
       processed = false;
@@ -73,14 +72,16 @@ Meteor.methods({
     check(productId, String);
     let updated = true;
     let error = "";
-    let product = ProductsCollection.findOne({_id: productId});
-
+    let product = ProductsCollection.findOne({ _id: productId });
+    if (!product.deleted) {
+      product.deleted = false;
+    }
     try {
       ProductsCollection.update({
         _id: productId
       }, {
         $set: {
-          deleted: (!product.deleted || true)
+          deleted: !product.deleted
         }
       });
     } catch (e) {
@@ -100,7 +101,7 @@ Meteor.methods({
     check(productId, String);
     let updated = true;
     let error = "";
-    let product = ProductsCollection.findOne({_id: productId});
+    let product = ProductsCollection.findOne({ _id: productId });
     try {
       ProductsCollection.update({
         _id: productId
