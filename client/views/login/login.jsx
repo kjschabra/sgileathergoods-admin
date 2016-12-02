@@ -21,19 +21,38 @@ export class Login extends React.Component {
 
     Meteor.loginWithPassword(userEmail, userPassword, function(error) {
       if (error) {
-        console.log(error);
         self.setState({ error: error.reason });
       } else {
         FlowRouter.go('AdminHome');
       }
     });
   }
-  getLoginError() {
+  checkAndRegister(evt) {
+    evt.preventDefault();
+    let self = this;
+    let userEmail = document.getElementById('register-email').value;
+    let userPassword = document.getElementById('register-password').value;
+    if (userEmail && userPassword) {
+      Accounts.createUser({email:userEmail, password: userPassword}, function(err, result) {
+        if (err) {
+          self.setState({error: err.reason});
+        } else {
+          FlowRouter.go('AdminHome');
+        }
+      });
+
+    } else {
+      self.setState({error: "Please provide an email and password"});
+    }
+  }
+  getFormError() {
     if (this.state && this.state.error) {
       return <div className="error-notice">
-        <div className="oaerror danger">
-          <strong>Error</strong> - {this.state.error}
-        </div>
+        <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700} transitionAppear={true} transitionAppearTimeout={500}>
+          <div className="oaerror danger">
+            <strong>Error</strong> - {this.state.error}
+          </div>
+        </ReactCSSTransitionGroup>
       </div>
     } else {
       return <div></div>
@@ -63,17 +82,17 @@ export class Login extends React.Component {
       render = <div className="col-sm-6 col-sm-offset-3 col-xs-12 jumbotron">
         <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700} transitionAppear={true} transitionAppearTimeout={500}>
           <h4 className='text-muted text-center'>Register</h4>
-          {this.getLoginError()}
+          {this.getFormError()}
           <form>
             <div className="form-group">
               <label htmlFor="email">Email address</label>
-              <input type="email" className="form-control" id="email" ref="input-email" placeholder="Email" />
+              <input type="email" className="form-control" id="register-email" ref="input-email" placeholder="Email" />
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input type="password" className="form-control" id="password" ref="input-password" placeholder="Password" />
+              <input type="password" className="form-control" id="register-password" ref="input-password" placeholder="Password" />
             </div>
-            <button onClick={this.checkAndLogin.bind(this)} className="btn btn-primary text-right">Register</button>
+            <button onClick={this.checkAndRegister.bind(this)} className="btn btn-primary text-right">Register</button>
           </form>
         </ReactCSSTransitionGroup>
       </div>
@@ -87,7 +106,7 @@ export class Login extends React.Component {
       render = <div className="col-sm-6 col-sm-offset-3 col-xs-12 jumbotron">
         <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700} transitionAppear={true} transitionAppearTimeout={500}>
           <h4 className='text-muted text-center'>Login</h4>
-          {this.getLoginError()}
+          {this.getFormError()}
           <form>
             <div className="form-group">
               <label htmlFor="email">Email address</label>
@@ -99,6 +118,8 @@ export class Login extends React.Component {
             </div>
             <button onClick={this.checkAndLogin.bind(this)} className="btn btn-primary text-right">Log In</button>
           </form>
+          <hr/>
+          <a href="#" className="text-right text-muted">Forgot Password</a>
         </ReactCSSTransitionGroup>
       </div>
     }

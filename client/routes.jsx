@@ -4,12 +4,14 @@ import { mount } from 'react-mounter';
 // load Layout and Welcome React components
 import { AdminLayout, LoginLayout } from './main.jsx';
 import { Login } from './views/login/login.jsx';
+import { PendingApproval } from './views/login/pendingVerification.jsx';
 import { AccountsUI } from './views/accounts.jsx';
 import { ProductsDisplay } from './views/admin/products-display.jsx';
 import { AddProductDisplay } from './views/admin/add-product-display.jsx';
 import { EditProductDisplay } from './views/admin/edit-product-display.jsx';
 import { HiddenProductsDisplay } from './views/admin/hidden-products-display.jsx';
 import { DeletedProductsDisplay } from './views/admin/deleted-products-display.jsx';
+import { UsersPendingApproval } from './views/admin/users-pending-approval.jsx';
 import Sidebar from './views/admin/sidebar.jsx';
 FlowRouter.route("/", {
   name: 'Home',
@@ -46,12 +48,30 @@ FlowRouter.route('/logout', {
   }
 });
 
+FlowRouter.route('/pending-approval', {
+  name: 'PendingApproval',
+  triggersEnter: [function(context, redirect) {
+    var user = Meteor.user();
+    if (!user) {
+      redirect('Login');
+    }
+  }],
+  action() {
+    mount(LoginLayout, {content: <PendingApproval /> } )
+  }
+});
+
 let adminRoutes = FlowRouter.group({
   prefix: '/admin',
   name: 'admin',
   triggersEnter: [function(context, redirect) {
-    if (!Meteor.userId()) {
+    Meteor.subscribe("userData");
+    var user = Meteor.user();
+    if (!user) {
       redirect('Login');
+    }
+    if (user && user.roles && !_.contains(user.roles, 'admin') ) {
+      redirect('PendingApproval');
     }
   }]
 });
@@ -97,6 +117,15 @@ adminRoutes.route('/deleted-products', {
     mount(AdminLayout, {
       sidebar: <Sidebar/>,
       content: <DeletedProductsDisplay />
+    });
+  }
+});
+adminRoutes.route('/pending-approval', {
+  name: "AdminPendingApproval",
+  action(params) {
+    mount(AdminLayout, {
+      sidebar: <Sidebar />,
+      content: <UsersPendingApproval />
     });
   }
 });

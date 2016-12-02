@@ -3,10 +3,40 @@ import { ProductsCollection, ProductImages } from '../imports/collections.js';
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
+function thisUserIsAdmin(userId) {
+  let thisUser = Meteor.users.findOne({_id:userId});
+  let isAdmin = thisUser && _.contains(thisUser.roles, 'admin');
+
+  return isAdmin;
+}
 Meteor.methods({
+  toggleAdminAccess(userIds) {
+    if (!this.userId || !thisUserIsAdmin(this.userId)) {
+      throw new Meteor.Error('Not-logged-in', "Please login as admin!");
+    }
+    check(userIds, Array);
+    _.each(userIds, function(userId) {
+      let user = Meteor.users.findOne({ _id: userId });
+      if (user && user.roles && _.contains(user.roles, 'admin')) {
+        let update = Meteor.users.update({ _id: userId }, {
+          $pull: {
+            roles: 'admin'
+          }
+        });
+      } else {
+        let update = Meteor.users.update({ _id: userId }, {
+          $addToSet: {
+            roles: 'admin'
+          }
+        });
+      }
+    });
+
+    return "Users updated";
+  },
   addProduct(formValues) {
-    if (!this.userId) {
-      throw new Meteor.error('Not-logged-in', "Please login!");
+    if (!this.userId || !thisUserIsAdmin(this.userId)) {
+      throw new Meteor.Error('Not-logged-in', "Please login as an admin!");
     }
     check(formValues, Array);
 
@@ -19,7 +49,7 @@ Meteor.methods({
     };
 
     formValues.map(function(values) {
-      if (values && values.tag && values.value && !_.isUndefined(values.tag) && !_.isEmpty(values) && !_.isArray(values.value) && !_.isObject(values.value) ) {
+      if (values && values.tag && values.value && !_.isUndefined(values.tag) && !_.isEmpty(values) && !_.isArray(values.value) && !_.isObject(values.value)) {
         product[values.tag] = values.value;
       }
     });
@@ -36,8 +66,8 @@ Meteor.methods({
     }
   },
   updateProduct(productId, formValues) {
-    if (!this.userId) {
-      throw new Meteor.error('Not-logged-in', "Please login!");
+    if (!this.userId || !thisUserIsAdmin(this.userId)) {
+      throw new Meteor.Error('Not-logged-in', "Please login as an admin!");
     }
     check(productId, String);
     check(formValues, Array);
@@ -66,8 +96,8 @@ Meteor.methods({
     }
   },
   toggleDeleteProduct(productId) {
-    if (!this.userId) {
-      throw new Meteor.error('Not-logged-in', "Please login!");
+    if (!this.userId || !thisUserIsAdmin(this.userId)) {
+      throw new Meteor.Error('Not-logged-in', "Please login as an admin!");
     }
     check(productId, String);
     let updated = true;
@@ -95,8 +125,8 @@ Meteor.methods({
     }
   },
   toggleShowOrHide(productId) {
-    if (!this.userId) {
-      throw new Meteor.error('Not-logged-in', "Please login!");
+    if (!this.userId || !thisUserIsAdmin(this.userId)) {
+      throw new Meteor.Error('Not-logged-in', "Please login as an admin!");
     }
     check(productId, String);
     let updated = true;

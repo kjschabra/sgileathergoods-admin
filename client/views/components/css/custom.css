@@ -1,4 +1,4 @@
-div.col-md-3 {
+div.main > div > div.col-md-3 {
   height: 500px;
 }
 div.col-md-3 > p {

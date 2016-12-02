@@ -35,8 +35,8 @@ export const AdminLayout = ({sidebar, content}) => (
   </nav>
   <div className="container-fluid">
     <div className="row">
-      <div className="col-sm-3 col-md-2 sidebar" style={{marginTop:50+'px'}}>{sidebar}</div>
-      <div className="col-sm-9 col-md-10 main" style={{marginTop:50+'px'}}>{content}</div>
+      <div className="col-sm-3 col-md-2 sidebar" style={{marginTop:5+'em'}}>{sidebar}</div>
+      <div className="col-sm-9 col-md-10 main" style={{marginTop:5+'em'}}>{content}</div>
     </div>
   </div>
   </div>

@@ -5,6 +5,20 @@ import { Mongo, Collection } from 'meteor/mongo';
 
 if (Meteor.isServer) {
   // This code only runs on the server
+  Meteor.publish("userData", function() {
+    if (this.userId) {
+      return Meteor.users.find({ _id: this.userId }, { fields: { 'email': 1, 'roles': 1 } });
+    } else {
+      this.ready();
+    }
+  });
+  Meteor.publish('usersOnApp', function() {
+    if (this.userId) {
+      return Meteor.users.find({}, {fields: {password: 0, services: 0} } );
+    } else {
+      this.ready();
+    }
+  });
   Meteor.publish('productsCollection', function() {
     if (this.userId)
       return ProductsCollection.find({ deleted: false, hidden: false }, { sort: { addedOn: -1 } });
