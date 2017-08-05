@@ -67,12 +67,12 @@ let adminRoutes = FlowRouter.group({
   triggersEnter: [function(context, redirect) {
     Meteor.subscribe("userData");
     var user = Meteor.user();
-    if (!user) {
+    if (!user)
       redirect('Login');
-    }
-    if (user && user.roles && !_.contains(user.roles, 'admin') ) {
+    if (user && !user.roles)
       redirect('PendingApproval');
-    }
+    if (user && user.roles && !_.contains(user.roles, 'admin') )
+      redirect('PendingApproval');
   }]
 });
 adminRoutes.route("/", {
